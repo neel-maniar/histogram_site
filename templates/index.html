@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Number Histogram</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>Submit a Number</h2>
+    <input type="number" id="numInput">
+    <button onclick="submitNumber()">Submit</button>
+
+    <h2>Histogram</h2>
+    <canvas id="histogramChart" width="600" height="400"></canvas>
+
+    <script>
+        async function submitNumber() {
+            const number = document.getElementById('numInput').value;
+            await fetch('/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ number })
+            });
+            document.getElementById('numInput').value = '';
+            loadHistogram();
+        }
+
+        async function loadHistogram() {
+            const res = await fetch('/histogram');
+            const json = await res.json();
+            const data = json.data;
+
+            const binSize = 10;
+            const max = Math.max(...data, 100);
+            const bins = Array(Math.ceil(max / binSize)).fill(0);
+
+            data.forEach(n => {
+                const idx = Math.floor(n / binSize);
+                bins[idx]++;
+            });
+
+            const labels = bins.map((_, i) => `${i * binSize}–${(i + 1) * binSize}`);
+
+            histogramChart.data.labels = labels;
+            histogramChart.data.datasets[0].data = bins;
+            histogramChart.update();
+        }
+
+        const ctx = document.getElementById('histogramChart').getContext('2d');
+        const histogramChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Frequency',
+                    data: [],
+                    backgroundColor: 'steelblue'
+                }]
+            }
+        });
+
+        loadHistogram();
+    </script>
+</body>
+</html>
