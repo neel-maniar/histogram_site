@@ -5,17 +5,16 @@ from flask import Flask, request, jsonify, render_template
 app = Flask(__name__)
 DATA_FILE = 'data.json'
 
-# Load existing data or initialize empty list
-if os.path.exists(DATA_FILE):
-    with open(DATA_FILE, 'r') as f:
-        try:
-            data = json.load(f)
-        except json.JSONDecodeError:
-            data = []
-else:
-    data = []
+def read_data():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r') as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return []
+    return []
 
-def save_data():
+def write_data(data):
     with open(DATA_FILE, 'w') as f:
         json.dump(data, f)
 
@@ -28,23 +27,17 @@ def submit():
     content = request.json
     try:
         number = float(content.get('number'))
-        name = content.get('name') or None  # Optional
+        name = content.get('name') or None
+        data = read_data()
         data.append({'number': number, 'name': name})
-        save_data()
+        write_data(data)
         return jsonify(success=True)
     except Exception as e:
         return jsonify(success=False, error=str(e)), 400
 
 @app.route('/histogram')
 def histogram():
-    if os.path.exists(DATA_FILE):
-        with open(DATA_FILE, 'r') as f:
-            try:
-                data = json.load(f)
-            except json.JSONDecodeError:
-                data = []
-    else:
-        data = []
+    data = read_data()
     return jsonify(data=data)
 
 if __name__ == '__main__':
