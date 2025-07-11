@@ -16,8 +16,10 @@
     <div id="countdown">Loading countdown...</div>
 
     <h2>🎯 What's Your Prediction?</h2>
+    <input type="text" id="nameInput" placeholder="Your name (optional)">
     <input type="text" id="timeInput" placeholder="hh:mm:ss">
     <button onclick="submitTime()">Submit</button>
+
 
     <h2>📊 Community Predictions Distribution</h2>
     <canvas id="histogramChart" width="600" height="400"></canvas>
@@ -52,21 +54,27 @@
             return hh * 3600 + mm * 60 + ss;
         }
 
-        async function submitTime() {
-            const timeStr = document.getElementById('timeInput').value;
-            if (!/^\d{1,2}:\d{2}:\d{2}$/.test(timeStr)) {
-                alert('Please enter time in hh:mm:ss format.');
-                return;
-            }
-            const seconds = parseTimeToSeconds(timeStr);
-            await fetch('/submit', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ number: seconds })
-            });
-            document.getElementById('timeInput').value = '';
-            loadHistogram();
+    async function submitTime() {
+        const timeStr = document.getElementById('timeInput').value;
+        const name = document.getElementById('nameInput').value.trim();
+
+        if (!/^\d{1,2}:\d{2}:\d{2}$/.test(timeStr)) {
+            alert('Please enter time in hh:mm:ss format.');
+            return;
         }
+
+        const seconds = parseTimeToSeconds(timeStr);
+
+        await fetch('/submit', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ number: seconds, name: name || null })
+        });
+
+        document.getElementById('timeInput').value = '';
+        document.getElementById('nameInput').value = '';
+        loadHistogram();
+    }
 
         async function loadHistogram() {
             const res = await fetch('/histogram');
@@ -74,19 +82,24 @@
             const data = json.data;
 
             const binSize = 600; // 10 minute bins
-            const max = Math.max(...data, 3600); // up to 6 hours
-            const bins = Array(Math.ceil(max / binSize)).fill(0);
+            const max = 3 * 3600; // up to 6 hours
+            const bins = Array(Math.ceil(max / binSize) + 1).fill(0);
 
-            data.forEach(seconds => {
-                const idx = Math.floor(seconds / binSize);
+
+            data.forEach(entry => {
+                const seconds = entry.number;
+                const idx = Math.min(Math.floor(seconds / binSize), 18);
                 bins[idx]++;
             });
+
 
             const labels = bins.map((_, i) => {
                 const start = i * binSize;
                 const end = (i + 1) * binSize - 1;
                 const toHMS = sec => new Date(sec * 1000).toISOString().substr(11, 8);
-                return `${toHMS(start)}–${toHMS(end)}`;
+                return i === bins.length - 1
+                    ? `${toHMS(start)}+`
+                    : `${toHMS(start)}–${toHMS(end)}`;
             });
 
             histogramChart.data.labels = labels;

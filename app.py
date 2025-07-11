@@ -1,7 +1,23 @@
+import json
+import os
 from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
-data = []  # In-memory storage
+DATA_FILE = 'data.json'
+
+# Load existing data or initialize empty list
+if os.path.exists(DATA_FILE):
+    with open(DATA_FILE, 'r') as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            data = []
+else:
+    data = []
+
+def save_data():
+    with open(DATA_FILE, 'w') as f:
+        json.dump(data, f)
 
 @app.route('/')
 def index():
@@ -9,17 +25,27 @@ def index():
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    number = request.json.get('number')
+    content = request.json
     try:
-        number = float(number)
-        data.append(number)
+        number = float(content.get('number'))
+        name = content.get('name') or None  # Optional
+        data.append({'number': number, 'name': name})
+        save_data()
         return jsonify(success=True)
-    except:
-        return jsonify(success=False), 400
+    except Exception as e:
+        return jsonify(success=False, error=str(e)), 400
 
 @app.route('/histogram')
 def histogram():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, 'r') as f:
+            try:
+                data = json.load(f)
+            except json.JSONDecodeError:
+                data = []
+    else:
+        data = []
     return jsonify(data=data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(port=5001, debug=True)
