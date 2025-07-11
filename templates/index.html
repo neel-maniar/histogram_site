@@ -6,6 +6,15 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
+    #logo {
+    position: absolute;
+    top: 1vw;
+    left: 1vw;
+    width: 12vw;        /* Scales with viewport width */
+    max-width: 180px;  /* Prevents it from becoming too large */
+    height: auto;
+    z-index: 1000;
+    }
     body {
       font-family: 'Poppins', sans-serif;
       background: #f4f9ff;
@@ -37,19 +46,62 @@
       text-decoration: underline;
     }
 
-    #countdown {
-      font-size: 1.5rem;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 30px;
-      color: #ff7043;
-    }
+  #countdown-container {
+    max-width: 600px;
+    margin: 40px auto 60px;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+  }
 
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
+  #countdown-label {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.5rem;
+    color: #1e88e5;
+    margin-bottom: 15px;
+    font-weight: 700;
+  }
+
+  #countdown {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .time-segment {
+    background: linear-gradient(135deg, #42a5f5, #478ed1);
+    border-radius: 12px;
+    color: white;
+    padding: 15px 20px;
+    min-width: 80px;
+    box-shadow: 0 6px 15px rgba(66, 165, 245, 0.5);
+    font-weight: 900;
+    font-size: 3.5rem;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .label {
+    margin-top: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #e3f2fd;
+  }
+
+  /* Race day celebration message */
+  #race-message {
+    font-size: 2rem;
+    color: #f44336;
+    font-weight: 700;
+    margin-top: 30px;
+    animation: pulse 1.5s infinite alternate;
+  }
+
+  @keyframes pulse {
+    0% { text-shadow: 0 0 5px #f44336; }
+    100% { text-shadow: 0 0 20px #ff7961; }
+  }
 
     .form-container {
       display: flex;
@@ -104,6 +156,11 @@
   </style>
 </head>
 <body>
+  <!-- <img src="../assets/logo.png" alt="Cancer Research UK Logo" id="logo" /> -->
+  <!-- <img src="../assets/logo.png" alt="Cancer Research UK Logo"/> -->
+    <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="Cancer Research UK Logo" id="logo"/>
+
+
   <h1>Neel is running the Royal Parks Half Marathon 🏃‍♂️</h1>
   <h2>Support Cancer Research UK and predict my time!</h2>
 
@@ -111,9 +168,28 @@
      please consider donating via my <a href="https://www.justgiving.com/fundraising/neelmaniar" target="_blank" rel="noopener noreferrer">JustGiving page</a>.
   </p>
 
-  <h2>⏰ Race Day Countdown</h2>
-  <div id="countdown">Loading countdown...</div>
-
+<div id="countdown-container">
+  <div id="countdown-label">⏰ Race Day Countdown</div>
+  <div id="countdown">
+    <div class="time-segment">
+      <div id="days">0</div>
+      <div class="label">Days</div>
+    </div>
+    <div class="time-segment">
+      <div id="hours">00</div>
+      <div class="label">Hours</div>
+    </div>
+    <div class="time-segment">
+      <div id="minutes">00</div>
+      <div class="label">Minutes</div>
+    </div>
+    <div class="time-segment">
+      <div id="seconds">00</div>
+      <div class="label">Seconds</div>
+    </div>
+  </div>
+  <div id="race-message" style="display:none;">🏁 It's race time! Good luck! 🎉</div>
+</div>
   <h2>🎯 Predict My Finish Time</h2>
   <div class="form-container">
     <input type="text" id="nameInput" placeholder="Your name (optional)">
@@ -126,29 +202,39 @@
   </div>
 
   <script>
-    function updateCountdown() {
-      const countdownEl = document.getElementById('countdown');
-      const raceDate = new Date('2025-10-12T08:00:00Z'); // 9AM BST is 8AM UTC
-      const now = new Date();
-      const diff = raceDate - now;
+  const raceDate = new Date('2025-10-12T08:00:00Z'); // UTC time for 9am BST
 
-      if (diff <= 0) {
-        countdownEl.textContent = "🏁 It's race time!";
-        clearInterval(countdownInterval);
-        return;
-      }
+  const daysEl = document.getElementById('days');
+  const hoursEl = document.getElementById('hours');
+  const minutesEl = document.getElementById('minutes');
+  const secondsEl = document.getElementById('seconds');
+  const raceMessage = document.getElementById('race-message');
+  const countdownContainer = document.getElementById('countdown');
 
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((diff / (1000 * 60)) % 60);
-      const seconds = Math.floor((diff / 1000) % 60);
+  function updateCountdown() {
+    const now = new Date();
+    const diff = raceDate - now;
 
-      countdownEl.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    if (diff <= 0) {
+      countdownContainer.style.display = 'none';
+      raceMessage.style.display = 'block';
+      return;
     }
 
-    const countdownInterval = setInterval(updateCountdown, 1000);
-    updateCountdown();
 
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((diff / (1000 * 60)) % 60);
+    const seconds = Math.floor((diff / 1000) % 60);
+
+    daysEl.textContent = days;
+    hoursEl.textContent = hours.toString().padStart(2, '0');
+    minutesEl.textContent = minutes.toString().padStart(2, '0');
+    secondsEl.textContent = seconds.toString().padStart(2, '0');
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
     function parseTimeToSeconds(timeStr) {
       const [hh, mm, ss] = timeStr.split(':').map(Number);
       return hh * 3600 + mm * 60 + ss;
