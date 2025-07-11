@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <title>Neel Half Marathon</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+    </style>
 </head>
 <body>
     <h1>Neel is running the Royal Parks Half Marathon for Cancer Research UK</h1>
@@ -20,9 +26,9 @@
     <input type="text" id="timeInput" placeholder="hh:mm:ss">
     <button onclick="submitTime()">Submit</button>
 
-
-    <h2>📊 Community Predictions Distribution</h2>
-    <canvas id="histogramChart" width="600" height="400"></canvas>
+    <div style="width: 100%; max-width: 1000px; margin: auto;">
+        <canvas id="histogramChart"></canvas>
+    </div>
 
     <script>
         // Countdown Timer
@@ -117,6 +123,22 @@
                     data: [],
                     backgroundColor: 'steelblue'
                 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: {
+                            autoSkip: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
             }
         });
 
