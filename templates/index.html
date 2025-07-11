@@ -1,148 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Neel Half Marathon</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        canvas {
-            width: 100% !important;
-            height: auto !important;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Neel Half Marathon</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f4f9ff;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1, h2 {
+      font-family: 'Baloo 2', cursive;
+      color: #1e88e5;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    p, a {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 20px;
+      line-height: 1.6;
+    }
+
+    a {
+      color: #1e88e5;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    #countdown {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 30px;
+      color: #ff7043;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    .form-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      font-size: 1rem;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      width: 200px;
+      transition: border 0.3s;
+    }
+
+    input[type="text"]:focus {
+      border-color: #1e88e5;
+      outline: none;
+    }
+
+    button {
+      background-color: #1e88e5;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #1565c0;
+    }
+
+    .chart-container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+  </style>
 </head>
 <body>
-    <h1>Neel is running the Royal Parks Half Marathon for Cancer Research UK</h1>
-    <h2>Support a good cause and predict my time!</h2>
-    <p>I am running the race to support <a href="https://www.cancerresearchuk.org" target="_blank" rel="noopener noreferrer">Cancer Research UK</a>. 
-        They are a great cause, doing groundbreaking research every day. If you have the means to, please donate to my 
-        <a href="https://www.justgiving.com/fundraising/neelmaniar" target="_blank" rel="noopener noreferrer">Justgiving page</a>.
-    </p>
-    <h2>⏰ Race Day Countdown</h2>
-    <div id="countdown">Loading countdown...</div>
+  <h1>Neel is running the Royal Parks Half Marathon 🏃‍♂️</h1>
+  <h2>Support Cancer Research UK and predict my time!</h2>
 
-    <h2>🎯 What's Your Prediction?</h2>
+  <p>I’m running to support <a href="https://www.cancerresearchuk.org" target="_blank" rel="noopener noreferrer">Cancer Research UK</a>. If you’d like to support, 
+     please consider donating via my <a href="https://www.justgiving.com/fundraising/neelmaniar" target="_blank" rel="noopener noreferrer">JustGiving page</a>.
+  </p>
+
+  <h2>⏰ Race Day Countdown</h2>
+  <div id="countdown">Loading countdown...</div>
+
+  <h2>🎯 Predict My Finish Time</h2>
+  <div class="form-container">
     <input type="text" id="nameInput" placeholder="Your name (optional)">
     <input type="text" id="timeInput" placeholder="hh:mm:ss">
     <button onclick="submitTime()">Submit</button>
+  </div>
 
-    <div style="width: 100%; max-width: 1000px; margin: auto;">
-        <canvas id="histogramChart"></canvas>
-    </div>
+  <div class="chart-container">
+    <canvas id="histogramChart"></canvas>
+  </div>
 
-    <script>
-        // Countdown Timer
-        function updateCountdown() {
-            const countdownEl = document.getElementById('countdown');
-            // Target time: 12th October 2025, 09:00:00 BST (UTC+1)
-            const raceDate = new Date('2025-10-12T08:00:00Z'); // UTC time (9am BST is 8am UTC)
-            const now = new Date();
-            const diff = raceDate - now;
+  <script>
+    function updateCountdown() {
+      const countdownEl = document.getElementById('countdown');
+      const raceDate = new Date('2025-10-12T08:00:00Z'); // 9AM BST is 8AM UTC
+      const now = new Date();
+      const diff = raceDate - now;
 
-            if (diff <= 0) {
-                countdownEl.textContent = "🏁 It's race time!";
-                clearInterval(countdownInterval);
-                return;
-            }
+      if (diff <= 0) {
+        countdownEl.textContent = "🏁 It's race time!";
+        clearInterval(countdownInterval);
+        return;
+      }
 
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-            const minutes = Math.floor((diff / (1000 * 60)) % 60);
-            const seconds = Math.floor((diff / 1000) % 60);
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diff / (1000 * 60)) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
 
-            countdownEl.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-        }
-
-        const countdownInterval = setInterval(updateCountdown, 1000);
-        updateCountdown(); // initial run
-        function parseTimeToSeconds(timeStr) {
-            const [hh, mm, ss] = timeStr.split(':').map(Number);
-            return hh * 3600 + mm * 60 + ss;
-        }
-
-    async function submitTime() {
-        const timeStr = document.getElementById('timeInput').value;
-        const name = document.getElementById('nameInput').value.trim();
-
-        if (!/^\d{1,2}:\d{2}:\d{2}$/.test(timeStr)) {
-            alert('Please enter time in hh:mm:ss format.');
-            return;
-        }
-
-        const seconds = parseTimeToSeconds(timeStr);
-
-        await fetch('/submit', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ number: seconds, name: name || null })
-        });
-
-        document.getElementById('timeInput').value = '';
-        document.getElementById('nameInput').value = '';
-        loadHistogram();
+      countdownEl.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
     }
 
-        async function loadHistogram() {
-            const res = await fetch('/histogram');
-            const json = await res.json();
-            const data = json.data;
+    const countdownInterval = setInterval(updateCountdown, 1000);
+    updateCountdown();
 
-            const binSize = 600; // 10 minute bins
-            const max = 3 * 3600; // up to 6 hours
-            const bins = Array(Math.ceil(max / binSize) + 1).fill(0);
+    function parseTimeToSeconds(timeStr) {
+      const [hh, mm, ss] = timeStr.split(':').map(Number);
+      return hh * 3600 + mm * 60 + ss;
+    }
 
+    async function submitTime() {
+      const timeStr = document.getElementById('timeInput').value;
+      const name = document.getElementById('nameInput').value.trim();
 
-            data.forEach(entry => {
-                const seconds = entry.number;
-                const idx = Math.min(Math.floor(seconds / binSize), 18);
+      if (!/^\d{1,2}:\d{2}:\d{2}$/.test(timeStr)) {
+        alert('Please enter time in hh:mm:ss format.');
+        return;
+      }
+
+      const seconds = parseTimeToSeconds(timeStr);
+
+      await fetch('/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ number: seconds, name: name || null })
+      });
+
+      document.getElementById('timeInput').value = '';
+      document.getElementById('nameInput').value = '';
+      loadHistogram();
+    }
+
+    async function loadHistogram() {
+        const res = await fetch('/histogram');
+        const json = await res.json();
+        const data = json.data;
+
+        const binSize = 600; // 10 minute bins
+        const startSeconds = 3600; // 1 hour in seconds
+        const max = 3 * 3600; // 3 hours max
+        const binCount = Math.ceil((max - startSeconds) / binSize) + 1; // bins after 1 hour
+        const bins = Array(binCount + 1).fill(0); // +1 for the <1hr bin
+
+        data.forEach(entry => {
+            const seconds = entry.number;
+            if (seconds < startSeconds) {
+                bins[0]++; // first bin for times less than 1 hour
+            } else {
+                const idx = Math.min(Math.floor((seconds - startSeconds) / binSize) + 1, bins.length - 1);
                 bins[idx]++;
-            });
-
-
-            const labels = bins.map((_, i) => {
-                const start = i * binSize;
-                const end = (i + 1) * binSize - 1;
-                const toHMS = sec => new Date(sec * 1000).toISOString().substr(11, 8);
-                return i === bins.length - 1
-                    ? `${toHMS(start)}+`
-                    : `${toHMS(start)}–${toHMS(end)}`;
-            });
-
-            histogramChart.data.labels = labels;
-            histogramChart.data.datasets[0].data = bins;
-            histogramChart.update();
-        }
-
-        const ctx = document.getElementById('histogramChart').getContext('2d');
-        const histogramChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Frequency',
-                    data: [],
-                    backgroundColor: 'steelblue'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        ticks: {
-                            autoSkip: false
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
             }
         });
+        const formatHHMM = (sec) => {
+            const date = new Date(sec * 1000);
+            const hh = date.getUTCHours().toString().padStart(2, '0');
+            const mm = date.getUTCMinutes().toString().padStart(2, '0');
+            return `${hh}:${mm}`;
+        };
 
-        loadHistogram();
-    </script>
+        const labels = bins.map((_, i) => {
+            if (i === 0) return `< 01:00`;
+            const start = startSeconds + (i - 1) * binSize;
+            const end = start + binSize - 1;
+            return i === bins.length - 1
+                ? `${formatHHMM(start)}+`
+                : `${formatHHMM(start)}–${formatHHMM(end)}`;
+        });
+
+        histogramChart.data.labels = labels;
+        histogramChart.data.datasets[0].data = bins;
+        histogramChart.update();
+    }
+
+    const ctx = document.getElementById('histogramChart').getContext('2d');
+    const histogramChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Frequency',
+          data: [],
+          backgroundColor: '#64b5f6'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            ticks: { autoSkip: false }
+          }
+        },
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+
+    loadHistogram();
+  </script>
 </body>
 </html>
