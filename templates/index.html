@@ -6,20 +6,48 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
   <style>
-    #logo {
-    position: absolute;
-    top: 1vw;
-    left: 1vw;
-    width: 12vw;        /* Scales with viewport width */
-    max-width: 180px;  /* Prevents it from becoming too large */
+  /* New container for logo + h1 */
+  #header-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 1rem;
+    position: relative; /* keep relative positioning for layout */
+  }
+
+  /* Reset logo positioning from absolute to static */
+  #logo {
+    position: static;  /* remove absolute positioning */
+    width: 12vw;
+    max-width: 180px;
     height: auto;
-    z-index: 1000;
+    z-index: auto;
+  }
+
+  /* On larger screens, keep the logo absolute and header centered */
+  @media (min-width: 1001px) {
+    #header-container {
+      justify-content: center;
+      position: relative;
     }
+    #logo {
+      position: absolute;
+      top: 1vw;
+      left: 1vw;
+    }
+    #header-container h1 {
+      margin-left: 0; /* reset margin if any */
+    }
+  }
+
+
+
     body {
       font-family: 'Poppins', sans-serif;
       background: #f4f9ff;
       color: #333;
-      margin: 0;
+      margin: 30px;
       padding: 0;
     }
 
@@ -153,15 +181,71 @@
       width: 100% !important;
       height: auto !important;
     }
+
+    @media (max-width: 1000px) {
+      input[type="text"] {
+        width: 90vw;
+        font-size: 1.6rem;
+        padding: 14px;
+      }
+
+      .form-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      button {
+        box-sizing: border-box;
+        width: 90vw;
+        font-size: 1.6rem;
+        padding: 14px;
+      }
+
+      h2 {
+        font-size: 2rem;
+      }
+
+      p {
+        font-size: 0.89rem;
+      }
+
+      .time-segment {
+        padding: 20px 24px;
+        min-width: 100px;
+        font-size: 4.2rem;
+      }
+
+      .label {
+        font-size: 1.2rem;
+      }
+
+      #countdown-label {
+        font-size: 2rem;
+      }
+
+      #header-container {
+        justify-content: flex-start;
+        padding: 0.5rem 1rem;
+      }
+      #logo {
+        width: 40vw; /* slightly larger on mobile */
+        /* max-width: 2000px; */
+        margin-right: 0.5rem;
+      }
+      #header-container h1 {
+        font-size: 3rem;
+        text-align: left;
+        margin: 0;
+      }
+}
   </style>
 </head>
 <body>
-  <!-- <img src="../assets/logo.png" alt="Cancer Research UK Logo" id="logo" /> -->
-  <!-- <img src="../assets/logo.png" alt="Cancer Research UK Logo"/> -->
+  <div id="header-container">
     <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="Cancer Research UK Logo" id="logo"/>
+    <h1>Neel is running the Royal Parks Half Marathon 🏃‍♂️</h1>
+  </div>
 
-
-  <h1>Neel is running the Royal Parks Half Marathon 🏃‍♂️</h1>
   <h2>Support Cancer Research UK and predict my time!</h2>
 
   <p>I’m running to support <a href="https://www.cancerresearchuk.org" target="_blank" rel="noopener noreferrer">Cancer Research UK</a>. If you’d like to support, 
